@@ -171,8 +171,15 @@ router.post('/reset-password', async (req, res) => {
 /* =====================================================
    PROTECTED PROFILE ROUTE
 ===================================================== */
-router.get('/profile', auth, (req, res) => {
-  res.json(req.user);
+router.get('/profile', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-passwordHash');
+    if (!user) return res.status(404).send('User not found');
+    res.json(user);
+  } catch (err) {
+    console.error('PROFILE FETCH ERROR:', err);
+    res.status(500).send('Error fetching profile');
+  }
 });
 
 module.exports = router;
